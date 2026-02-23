@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKMOLA-DT-V1 | Digital Twin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #12122a;
+            --bg-card: #1a1a3e;
+            --bg-card-hover: #222255;
+            --accent-blue: #4f8fff;
+            --accent-cyan: #00d4ff;
+            --accent-green: #00ff88;
+            --accent-orange: #ff9f43;
+            --accent-red: #ff4757;
+            --accent-purple: #a855f7;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888aa;
+            --text-muted: #555577;
+            --border: #2a2a4e;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #00d4ff 0%, #4f8fff 100%);
+            --shadow-glow: 0 0 30px rgba(79, 143, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ──────────────────────────────────────── */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header h1 span {
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge.loading {
+            background: rgba(79, 143, 255, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(79, 143, 255, 0.3);
+        }
+
+        .status-badge.online {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .status-badge.error {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ─── Navigation ──────────────────────────────────── */
+        .nav {
+            display: flex;
+            padding: 0 32px;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(79, 143, 255, 0.05);
+        }
+
+        .nav-tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        /* ─── Main Content ────────────────────────────────── */
+        .main {
+            padding: 24px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ─── Cards ───────────────────────────────────────── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-icon {
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(79, 143, 255, 0.1);
+        }
+
+        /* ─── Stats Colors ────────────────────────────────── */
+        .text-blue { color: var(--accent-blue); }
+        .text-cyan { color: var(--accent-cyan); }
+        .text-green { color: var(--accent-green); }
+        .text-orange { color: var(--accent-orange); }
+        .text-red { color: var(--accent-red); }
+        .text-purple { color: var(--accent-purple); }
+
+        .bg-blue { background: rgba(79, 143, 255, 0.1); }
+        .bg-cyan { background: rgba(0, 212, 255, 0.1); }
+        .bg-green { background: rgba(0, 255, 136, 0.1); }
+        .bg-orange { background: rgba(255, 159, 67, 0.1); }
+
+        /* ─── Tile Grid ───────────────────────────────────── */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .tile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tile-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .tile-preview {
+            height: 200px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .tile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tile-info {
+            padding: 14px 16px;
+        }
+
+        .tile-info h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .tile-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .tile-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .tile-stat {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .tile-stat strong {
+            color: var(--accent-cyan);
+        }
+
+        /* ─── Full Tile View ──────────────────────────────── */
+        .tile-detail {
+            display: none;
+        }
+
+        .tile-detail.active {
+            display: block;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-blue);
+            background: var(--bg-card-hover);
+        }
+
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+
+        .channel-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .channel-card img {
+            width: 100%;
+            display: block;
+        }
+
+        .channel-label {
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ─── Feature Map (big image) ─────────────────────── */
+        .feature-image {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        /* ─── Buttons ─────────────────────────────────────── */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-success {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        /* ─── QA Results ──────────────────────────────────── */
+        .qa-result {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .qa-result.pass {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .qa-result.warn {
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .qa-result.fail {
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .qa-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .qa-icon {
+            font-size: 20px;
+        }
+
+        .qa-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .qa-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .checks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .check-item {
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .check-pass { color: var(--accent-green); }
+        .check-fail { color: var(--accent-red); }
+        .check-warn { color: var(--accent-orange); }
+
+        /* ─── Model Section ───────────────────────────────── */
+        .model-result {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .model-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .model-stat {
+            background: var(--bg-secondary);
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .model-stat .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .model-stat .value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* ─── Loading ─────────────────────────────────────── */
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-msg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* ─── Prediction Section ──────────────────────────── */
+        .prediction-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .prediction-container img {
+            max-width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .prediction-select {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        /* ─── Section Header ──────────────────────────────── */
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* ─── Responsive ──────────────────────────────────── */
+        @media (max-width: 768px) {
+            .header { padding: 12px 16px; }
+            .nav { padding: 0 16px; }
+            .main { padding: 16px; }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">🌊</div>
+            <h1>AKMOLA-DT-V1 <span>| Digital Twin Dashboard</span></h1>
+        </div>
+        <div id="status" class="status-badge loading">
+            <div class="dot"></div>
+            <span>Connecting...</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-tab active" data-page="overview">📊 Overview</div>
+        <div class="nav-tab" data-page="tiles">🗺️ Tiles</div>
+        <div class="nav-tab" data-page="model">🧠 Model</div>
+        <div class="nav-tab" data-page="qa">✅ QA Checks</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+
+        <!-- ═══════ OVERVIEW PAGE ═══════ -->
+        <div class="page active" id="page-overview">
+            <div class="section-header">
+                <h2>Pipeline Overview</h2>
+                <p>AKMOLA-DT-V1 — AI Digital Twin for Flood Prediction (Esil River / Astana)</p>
+            </div>
+
+            <div class="cards-grid" id="overview-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Total Tiles</div>
+                        <div class="card-icon text-blue bg-blue">🗺️</div>
+                    </div>
+                    <div class="card-value text-blue" id="stat-tiles">—</div>
+                    <div class="card-subtitle">Processed terrain tiles</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Channels</div>
+                        <div class="card-icon text-cyan bg-cyan">📐</div>
+                    </div>
+                    <div class="card-value text-cyan">6</div>
+                    <div class="card-subtitle">Elevation, Slope, Aspect, TRI, Flow</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">CRS</div>
+                        <div class="card-icon text-green bg-green">🌐</div>
+                    </div>
+                    <div class="card-value text-green" style="font-size:20px" id="stat-crs">—</div>
+                    <div class="card-subtitle">Coordinate Reference System</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Architecture</div>
+                        <div class="card-icon text-orange bg-orange">🧠</div>
+                    </div>
+                    <div class="card-value text-orange" style="font-size:18px">EL-FNO</div>
+                    <div class="card-subtitle">Eulerian-Lagrangian FNO</div>
+                </div>
+            </div>
+
+            <div class="section-header" style="margin-top:20px">
+                <h2>Pipeline Summary</h2>
+            </div>
+            <div id="pipeline-info" class="card">
+                <div class="loading-msg"><div class="loading-spinner"></div> Loading pipeline data...</div>
+            </div>
+        </div>
+
+        <!-- ═══════ TILES PAGE ═══════ -->
+        <div class="page" id="page-tiles">
+            <div class="section-header">
+                <h2>Terrain Tiles</h2>
+                <p>Click a tile to view all 6 feature channels</p>
+            </div>
+
+            <div id="tiles-list" class="tile-grid">
+                <div class="loading-msg"><div class="loading-spinner"></div> Loading tiles...</div>
+            </div>
+
+            <div id="tile-detail" class="tile-detail">
+                <div class="detail-header">
+                    <h2 id="detail-title">Tile Details</h2>
+                    <button class="back-btn" onclick="closeTileDetail()">← Back to Tiles</button>
+                </div>
+
+                <div id="all-channels-img" class="prediction-container" style="margin-bottom:20px">
+                </div>
+
+                <div class="section-header">
+                    <h3>Individual Channels</h3>
+                </div>
+                <div id="channel-images" class="channel-grid"></div>
+            </div>
+        </div>
+
+        <!-- ═══════ MODEL PAGE ═══════ -->
+        <div class="page" id="page-model">
+            <div class="section-header">
+                <h2>EL-FNO Model</h2>
+                <p>Test model inference and view predictions</p>
+            </div>
+
+            <div style="margin-bottom:20px">
+                <button class="btn btn-primary" onclick="runModelTest()">⚡ Run Model Test</button>
+            </div>
+
+            <div id="model-result" class="model-result" style="display:none"></div>
+
+            <div style="margin-top:30px">
+                <div class="section-header">
+                    <h3>Predict on Tile</h3>
+                    <p>Select a tile to run model inference and see predicted water depth</p>
+                </div>
+                <div class="prediction-select">
+                    <select id="predict-tile-select">
+                        <option value="">— Select a tile —</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="runPrediction()">🔮 Predict</button>
+                </div>
+                <div id="prediction-result" class="prediction-container"></div>
+            </div>
+        </div>
+
+        <!-- ═══════ QA PAGE ═══════ -->
+        <div class="page" id="page-qa">
+            <div class="section-header">
+                <h2>Acceptance Criteria</h2>
+                <p>Automated QA checks per ТЗ §6</p>
+            </div>
+
+            <div style="margin-bottom:20px">
+                <button class="btn btn-primary" onclick="runQA()">🔍 Run QA Checks</button>
+            </div>
+
+            <div id="qa-results"></div>
+        </div>
+    </div>
+
+    <script>
+        // ─── State ────────────────────────────────────────────
+        let tilesData = [];
+        const API = "";
+
+        // ─── Navigation ──────────────────────────────────────
+        document.querySelectorAll(".nav-tab").forEach(tab => {
+            tab.addEventListener("click", () => {
+                document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+                document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+                tab.classList.add("active");
+                document.getElementById("page-" + tab.dataset.page).classList.add("active");
+            });
+        });
+
+        // ─── Init ────────────────────────────────────────────
+        async function init() {
+            try {
+                const res = await fetch(API + "/api/tiles");
+                const data = await res.json();
+                tilesData = data.tiles;
+
+                document.getElementById("stat-tiles").textContent = data.count;
+                document.getElementById("stat-crs").textContent = data.crs;
+
+                setStatus("online", `${data.count} tiles loaded`);
+                renderTiles();
+                populateTileSelect();
+                loadPipelineSummary();
+            } catch (e) {
+                setStatus("error", "Connection failed");
+                document.getElementById("pipeline-info").innerHTML = `
+                    <div style="padding:20px;color:var(--accent-red)">
+                        ⚠ Could not connect to backend. Make sure you've run the pipeline first:<br>
+                        <code style="margin-top:8px;display:block;color:var(--accent-cyan)">
+                            python -m tools.generate_synthetic<br>
+                            python -m dashboard.app
+                        </code>
+                    </div>`;
+            }
+        }
+
+        function setStatus(type, text) {
+            const el = document.getElementById("status");
+            el.className = "status-badge " + type;
+            el.innerHTML = `<div class="dot"></div><span>${text}</span>`;
+        }
+
+        // ─── Pipeline Summary ────────────────────────────────
+        async function loadPipelineSummary() {
+            try {
+                const res = await fetch(API + "/api/pipeline/summary");
+                const data = await res.json();
+                const el = document.getElementById("pipeline-info");
+
+                if (data.status === "no pipeline run found") {
+                    el.innerHTML = `<div style="padding:20px;color:var(--text-secondary)">
+                        No pipeline run found. Run: <code style="color:var(--accent-cyan)">python -m tools.generate_synthetic</code>
+                    </div>`;
+                } else {
+                    el.innerHTML = `
+                        <div style="padding:0">
+                            <div class="model-stats">
+                                <div class="model-stat">
+                                    <div class="label">DEM Size</div>
+                                    <div class="value text-blue">${data.dem_size ? data.dem_size.join('×') : '—'}</div>
+                                </div>
+                                <div class="model-stat">
+                                    <div class="label">Pixel Size</div>
+                                    <div class="value text-cyan">${data.pixel_size_m || '—'}m</div>
+                                </div>
+                                <div class="model-stat">
+                                    <div class="label">Tiles</div>
+                                    <div class="value text-green">${data.n_tiles || '—'}</div>
+                                </div>
+                                <div class="model-stat">
+                                    <div class="label">Tile Shape</div>
+                                    <div class="value text-orange">${data.tile_shape ? data.tile_shape.join('×') : '—'}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:16px;padding:0 4px">
+                                <p style="color:var(--text-secondary);font-size:13px">
+                                    <strong>Channels:</strong> ${(data.channels || []).join(', ')}
+                                </p>
+                                <p style="color:var(--text-secondary);font-size:13px;margin-top:4px">
+                                    <strong>CRS:</strong> ${data.crs || '—'} &nbsp; | &nbsp;
+                                    <strong>Output:</strong> ${data.output_dir || '—'}
+                                </p>
+                            </div>
+                        </div>`;
+                }
+            } catch (e) {
+                console.error("Pipeline summary error:", e);
+            }
+        }
+
+        // ─── Tiles ───────────────────────────────────────────
+        function renderTiles() {
+            const container = document.getElementById("tiles-list");
+            if (tilesData.length === 0) {
+                container.innerHTML = `<div style="padding:20px;color:var(--text-secondary)">No tiles found. Run the pipeline first.</div>`;
+                return;
+            }
+
+            container.innerHTML = tilesData.map(tile => `
+                <div class="tile-card" onclick="openTile('${tile.tile_id}')">
+                    <div class="tile-preview">
+                        <img src="${API}/api/tile/${tile.tile_id}/channel/0?cmap=terrain"
+                             alt="Elevation" loading="lazy"
+                             onerror="this.parentElement.innerHTML='<span style=color:var(--text-muted)>📊 Loading...</span>'">
+                    </div>
+                    <div class="tile-info">
+                        <h3>Tile ${tile.tile_id}</h3>
+                        <p>${tile.crs || ''} &nbsp;|&nbsp; ${tile.shape ? tile.shape.join('×') : ''}</p>
+                        <div class="tile-stats">
+                            ${tile.stats ? `
+                                <div class="tile-stat">Slope: <strong>${(tile.stats.mean_slope || 0).toFixed(3)}</strong></div>
+                                <div class="tile-stat">TRI: <strong>${(tile.stats.ruggedness_index || 0).toFixed(3)}</strong></div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function openTile(tileId) {
+            document.getElementById("tiles-list").style.display = "none";
+            const detail = document.getElementById("tile-detail");
+            detail.classList.add("active");
+            document.getElementById("detail-title").textContent = `Tile ${tileId}`;
+
+            // All channels composite
+            document.getElementById("all-channels-img").innerHTML = `
+                <img src="${API}/api/tile/${tileId}/all_channels"
+                     alt="All Channels" class="feature-image"
+                     onerror="this.parentElement.innerHTML='<p style=color:var(--text-muted)>Could not load image</p>'">
+            `;
+
+            // Individual channels
+            const channelNames = ["Elevation", "Slope Magnitude", "Aspect X", "Aspect Y", "Ruggedness (TRI)", "Flow Accumulation"];
+            const cmaps = ["terrain", "hot", "RdBu_r", "RdBu_r", "YlOrRd", "Blues"];
+            document.getElementById("channel-images").innerHTML = channelNames.map((name, i) => `
+                <div class="channel-card">
+                    <img src="${API}/api/tile/${tileId}/channel/${i}?cmap=${cmaps[i]}"
+                         alt="${name}" loading="lazy"
+                         onerror="this.parentElement.innerHTML='<div class=channel-label>Failed to load</div>'">
+                    <div class="channel-label">${name}</div>
+                </div>
+            `).join("");
+        }
+
+        function closeTileDetail() {
+            document.getElementById("tiles-list").style.display = "";
+            document.getElementById("tile-detail").classList.remove("active");
+        }
+
+        function populateTileSelect() {
+            const select = document.getElementById("predict-tile-select");
+            tilesData.forEach(tile => {
+                const opt = document.createElement("option");
+                opt.value = tile.tile_id;
+                opt.textContent = `Tile ${tile.tile_id}`;
+                select.appendChild(opt);
+            });
+        }
+
+        // ─── Model ───────────────────────────────────────────
+        async function runModelTest() {
+            const container = document.getElementById("model-result");
+            container.style.display = "block";
+            container.innerHTML = `<div class="loading-msg"><div class="loading-spinner"></div> Running model test...</div>`;
+
+            try {
+                const res = await fetch(API + "/api/model/test");
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    container.innerHTML = `
+                        <div class="qa-header">
+                            <span class="qa-icon">✅</span>
+                            <span class="qa-title text-green">Model Test Passed</span>
+                        </div>
+                        <div class="model-stats">
+                            <div class="model-stat">
+                                <div class="label">Parameters</div>
+                                <div class="value text-blue">${data.model_params.total_params_M}</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="label">Device</div>
+                                <div class="value text-cyan">${data.device}</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="label">Input Shape</div>
+                                <div class="value text-orange" style="font-size:14px">${JSON.stringify(data.input_shape.terrain)}</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="label">Output Shape</div>
+                                <div class="value text-green" style="font-size:14px">${JSON.stringify(data.output_shape)}</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="label">Pred Min</div>
+                                <div class="value text-purple">${data.prediction_stats.min.toFixed(4)}</div>
+                            </div>
+                            <div class="model-stat">
+                                <div class="label">Pred Max</div>
+                                <div class="value text-purple">${data.prediction_stats.max.toFixed(4)}</div>
+                            </div>
+                        </div>`;
+                } else {
+                    container.innerHTML = `<div style="color:var(--accent-red)">❌ Error: ${data.message}</div>`;
+                }
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--accent-red)">❌ Connection error: ${e.message}</div>`;
+            }
+        }
+
+        async function runPrediction() {
+            const tileId = document.getElementById("predict-tile-select").value;
+            if (!tileId) return alert("Select a tile first");
+
+            const container = document.getElementById("prediction-result");
+            container.innerHTML = `<div class="loading-msg"><div class="loading-spinner"></div> Running inference on tile ${tileId}...</div>`;
+
+            container.innerHTML = `
+                <img src="${API}/api/model/predict/${tileId}"
+                     alt="Prediction for ${tileId}"
+                     style="max-width:100%;border-radius:12px;border:1px solid var(--border)"
+                     onerror="this.parentElement.innerHTML='<div style=color:var(--accent-red)>❌ Prediction failed. Is PyTorch installed?</div>'">
+            `;
+        }
+
+        // ─── QA ──────────────────────────────────────────────
+        async function runQA() {
+            const container = document.getElementById("qa-results");
+            container.innerHTML = `<div class="loading-msg"><div class="loading-spinner"></div> Running QA checks...</div>`;
+
+            try {
+                const res = await fetch(API + "/api/qa/check");
+                const data = await res.json();
+
+                let html = `
+                    <div class="qa-result ${data.overall === 'PASS' ? 'pass' : 'warn'}">
+                        <div class="qa-header">
+                            <span class="qa-icon">${data.overall === 'PASS' ? '✅' : '⚠️'}</span>
+                            <span class="qa-title">Overall: ${data.overall}</span>
+                        </div>
+                        <div class="qa-details">
+                            Checked ${data.tiles_checked} tiles.
+                            ${data.physics_warnings.length > 0 ? `<br>⚠ Warnings: ${data.physics_warnings.join('; ')}` : 'No warnings.'}
+                        </div>
+                    </div>`;
+
+                data.details.forEach(tile => {
+                    const allPass = Object.values(tile.checks).every(v => v === "PASS");
+                    html += `
+                        <div class="qa-result ${allPass ? 'pass' : 'warn'}">
+                            <div class="qa-header">
+                                <span class="qa-icon">${allPass ? '✅' : '⚠️'}</span>
+                                <span class="qa-title">Tile ${tile.tile_id}</span>
+                                <span style="color:var(--text-muted);font-size:13px;margin-left:auto">${tile.shape.join('×')}</span>
+                            </div>
+                            <div class="checks-list">
+                                ${Object.entries(tile.checks).map(([k, v]) => `
+                                    <div class="check-item">
+                                        <span>${k}</span>
+                                        <span class="${v === 'PASS' ? 'check-pass' : v.startsWith('FAIL') ? 'check-fail' : 'check-warn'}">${v}</span>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>`;
+                });
+
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--accent-red)">❌ QA check failed: ${e.message}</div>`;
+            }
+        }
+
+        // ─── Start ───────────────────────────────────────────
+        init();
+    </script>
+</body>
+</html>

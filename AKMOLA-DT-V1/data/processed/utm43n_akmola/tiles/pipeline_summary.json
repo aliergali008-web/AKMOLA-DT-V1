@@ -1,0 +1,24 @@
+{
+  "dem_size": [
+    256,
+    256
+  ],
+  "pixel_size_m": 30.0,
+  "n_tiles": 1,
+  "tile_shape": [
+    6,
+    256,
+    256
+  ],
+  "channels": [
+    "Elevation",
+    "Slope_Mag",
+    "Aspect_X",
+    "Aspect_Y",
+    "Ruggedness",
+    "Log_Flow_Accum"
+  ],
+  "crs": "EPSG:32643",
+  "output_dir": "C:\\Users\\Hadick\\OneDrive\\Desktop\\AKMOLA-DT-V1\\data\\processed\\utm43n_akmola\\tiles",
+  "model_inference": null
+}

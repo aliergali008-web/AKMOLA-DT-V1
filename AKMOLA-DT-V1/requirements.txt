@@ -1,0 +1,23 @@
+# AKMOLA-DT-V1 Dependencies
+# Core Scientific
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Geospatial
+rasterio>=1.3.0
+pyproj>=3.5.0
+richdem>=0.3.4
+
+# Deep Learning
+torch>=2.0.0
+
+# Web Dashboard
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Testing
+pytest>=7.4.0
+
+# Utilities
+tqdm>=4.65.0
+matplotlib>=3.7.0

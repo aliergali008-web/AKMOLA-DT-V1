@@ -1,0 +1,61 @@
+{
+  "tile_id": "x00_y00",
+  "bounds": [
+    405000.0,
+    4772832.0,
+    412680.0,
+    4780512.0
+  ],
+  "affine_transform": [
+    30.0,
+    0.0,
+    405000.0,
+    0.0,
+    -30.0,
+    4780512.0
+  ],
+  "crs": "EPSG:32643",
+  "shape": [
+    6,
+    256,
+    256
+  ],
+  "channels": [
+    "Elevation",
+    "Slope_Mag",
+    "Aspect_X",
+    "Aspect_Y",
+    "Ruggedness",
+    "Log_Flow_Accum"
+  ],
+  "dtype": "<class 'numpy.float32'>",
+  "stats": {
+    "mean_elevation": 0.4867691993713379,
+    "std_elevation": 0.17917290329933167,
+    "min_elevation": 0.0,
+    "max_elevation": 1.0,
+    "mean_slope_mag": 0.316456139087677,
+    "std_slope_mag": 0.15633416175842285,
+    "min_slope_mag": 0.0,
+    "max_slope_mag": 1.0,
+    "mean_aspect_x": 0.48976901173591614,
+    "std_aspect_x": 0.3354577124118805,
+    "min_aspect_x": 0.0,
+    "max_aspect_x": 1.0,
+    "mean_aspect_y": 0.4721861481666565,
+    "std_aspect_y": 0.3695802688598633,
+    "min_aspect_y": 0.0,
+    "max_aspect_y": 1.0,
+    "mean_ruggedness": 0.33351585268974304,
+    "std_ruggedness": 0.17045538127422333,
+    "min_ruggedness": 0.0,
+    "max_ruggedness": 1.0,
+    "mean_log_flow_accum": 0.14305442571640015,
+    "std_log_flow_accum": 0.18970392644405365,
+    "min_log_flow_accum": 0.0,
+    "max_log_flow_accum": 1.0,
+    "mean_slope": 0.316456139087677,
+    "ruggedness_index": 0.33351585268974304
+  },
+  "notes": "Synthetic steppe DEM — micro-depressions and flow accumulation."
+}
